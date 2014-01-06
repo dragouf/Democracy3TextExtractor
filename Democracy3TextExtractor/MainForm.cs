@@ -382,7 +382,7 @@ namespace Democracy3TextExtractor
                 {
                     foreach (var stringIniKey in stringIniSection.Keys)
                     {
-                        var key = string.Format("{0}@{1}", stringIniSection.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", stringIniSection.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
 
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
@@ -423,12 +423,12 @@ namespace Democracy3TextExtractor
                 var stringIniSection = strinInidata.Sections.First();
 
                 var stringIniKey = stringIniSection.Keys.First(k => k.KeyName == "SuccessText");
-                var key = string.Format("{0}@{1}", stringIniSection.SectionName, stringIniKey.KeyName);
+                var key = string.Format("{0}@{2}@{1}", stringIniSection.SectionName, stringIniKey.KeyName, fileName);
                 var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                 iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
 
                 stringIniKey = stringIniSection.Keys.First(k => k.KeyName == "GUIName");
-                key = string.Format("{0}@{1}", stringIniSection.SectionName, stringIniKey.KeyName);
+                key = string.Format("{0}@{2}@{1}", stringIniSection.SectionName, stringIniKey.KeyName, fileName);
                 value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                 iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
 
@@ -461,7 +461,7 @@ namespace Democracy3TextExtractor
                     if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "description"))
                     {
                         var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "description");
-                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", section.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
                     }
@@ -497,7 +497,7 @@ namespace Democracy3TextExtractor
                     if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "description"))
                     {
                         var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "description");
-                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", section.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
                     }
@@ -505,7 +505,7 @@ namespace Democracy3TextExtractor
                     if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "guiname"))
                     {
                         var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "guiname");
-                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", section.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
                     }
@@ -541,7 +541,7 @@ namespace Democracy3TextExtractor
                     if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "description"))
                     {
                         var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "description");
-                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", section.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
                     }
@@ -549,7 +549,7 @@ namespace Democracy3TextExtractor
                     if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "guiname"))
                     {
                         var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "guiname");
-                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var key = string.Format("{0}@{2}@{1}", section.SectionName, stringIniKey.KeyName, fileName);
                         var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
                         iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
                     }
@@ -633,7 +633,7 @@ namespace Democracy3TextExtractor
                     var key = csv.GetField(keyIndex);
                     var value = this.SurroundWithQuotes(csv.GetField(valueIndex));
                     if (!string.IsNullOrWhiteSpace(key))
-                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
+                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(fileName + "@" + key, value);
                 }
             }
             catch (Exception ex)
@@ -670,9 +670,9 @@ namespace Democracy3TextExtractor
                         if (ligne.Length > valueIndex)
                         {
                             var key = ligne[keyIndex];
-                            if (sectionData.Keys.Any(k => k.KeyName == key))
+                            if (sectionData.Keys.Any(k => ExtractKeyFromString(k.KeyName) == key))
                             {
-                                var keyData = sectionData.Keys.First(k => k.KeyName == key);
+                                var keyData = sectionData.Keys.First(k => ExtractKeyFromString(k.KeyName) == key);
                                 ligne[valueIndex] = RemoveSurroundedQuotes(keyData.Value);
                             }
                         }
@@ -700,6 +700,11 @@ namespace Democracy3TextExtractor
         #endregion
 
         #region Tools
+        private string ExtractKeyFromString(string value)
+        {
+            var parsed = value.Split('@');
+            return parsed.Last();
+        }
         private string SurroundWithQuotes(string value)
         {
             if (!value.StartsWith("\""))
