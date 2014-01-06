@@ -170,6 +170,18 @@ namespace Democracy3TextExtractor
                 }
             }
 
+            // Missions
+            path = this.textBoxSource.Text + "\\missions\\";
+            if (Directory.Exists(path))
+            {
+                files = Directory.GetDirectories(path);
+                foreach (var filePath in files)
+                {
+                    var fileName = filePath.Replace(path, "") + ".txt";
+                    ParseMissionsIni(filePath + "\\" + fileName, fileName, iniData);
+                }
+            }
+
             var parser = new IniParser.FileIniDataParser();
             parser.SaveFile(outputFilePath, iniData);
 
@@ -296,6 +308,23 @@ namespace Democracy3TextExtractor
                     {
                         var fileSection = transifexInidata.Sections.First(s => s.SectionName == fileName);
                         InjectEventsIni(filePath, fileName, fileSection);
+                    }
+                }
+            }
+
+            // Events
+            path = this.textBoxSource.Text + "\\missions\\";
+            if (Directory.Exists(path))
+            {
+                files = Directory.GetDirectories(path);
+                foreach (var filePath in files)
+                {
+                    var fileName = filePath.Replace(path, "") + ".txt";
+                    // try to find file section in transifex file
+                    if (transifexInidata.Sections.Any(s => s.SectionName == fileName))
+                    {
+                        var fileSection = transifexInidata.Sections.First(s => s.SectionName == fileName);
+                        InjectMissionsIni(filePath + "\\" + fileName, fileName, fileSection);
                     }
                 }
             }
@@ -489,6 +518,50 @@ namespace Democracy3TextExtractor
         }
 
         private void InjectEventsIni(string filePath, string fileName, IniParser.Model.SectionData sectionData)
+        {
+            InjectStringIni(filePath, fileName, sectionData);
+        }
+        #endregion
+
+        #region Ini Missions
+        private void ParseMissionsIni(string filePath, string fileName, IniParser.Model.IniData iniData)
+        {
+            iniData.Sections.AddSection(fileName);
+
+            var stringIniParser = new IniParser.FileIniDataParser();
+            stringIniParser.Parser.Configuration.SkipInvalidLines = true;
+            stringIniParser.Parser.Configuration.AllowDuplicateKeys = true;
+
+            try
+            {
+                var strinInidata = stringIniParser.LoadFile(filePath);
+
+                foreach (var section in strinInidata.Sections)
+                {
+                    if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "description"))
+                    {
+                        var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "description");
+                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
+                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
+                    }
+
+                    if (section.Keys.Any(k => k.KeyName.ToLower().Trim() == "guiname"))
+                    {
+                        var stringIniKey = section.Keys.First(k => k.KeyName.ToLower().Trim() == "guiname");
+                        var key = string.Format("{0}@{1}", section.SectionName, stringIniKey.KeyName);
+                        var value = this.SurroundWithQuotes(stringIniKey.Value.Trim());
+                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(key, value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void InjectMissionsIni(string filePath, string fileName, IniParser.Model.SectionData sectionData)
         {
             InjectStringIni(filePath, fileName, sectionData);
         }
