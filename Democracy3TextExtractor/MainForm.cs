@@ -29,9 +29,12 @@ namespace Democracy3TextExtractor
                 string pathUser = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 string pathDownload = Path.Combine(pathUser, "Downloads");
                 this.openFileDialogTransifex.InitialDirectory = pathDownload;
+
+                this.tabControl1.SelectedIndex = 1;
             }
             catch 
             {
+
             }
         }
 
@@ -198,7 +201,7 @@ namespace Democracy3TextExtractor
             }
 
             var transifexFileParser = new IniParser.FileIniDataParser();
-            var transifexInidata = transifexFileParser.LoadFile(this.textBoxTransifexFile.Text);
+            var transifexInidata = transifexFileParser.LoadFile(this.textBoxTransifexFile.Text, Encoding.UTF8);
             
             // RACINE
             string path = this.textBoxSource.Text + "\\";
@@ -348,7 +351,7 @@ namespace Democracy3TextExtractor
                 {
                     var section = sectionKey.KeyName.Split('@').First();
                     var key = sectionKey.KeyName.Split('@').Last();
-                    var value = sectionKey.Value;
+                    var value = sectionKey.Value.DeleteAccentAndSpecialsChar();
 
                     if (strinInidata.Sections.Any(s => s.SectionName == section))
                     {
@@ -673,7 +676,7 @@ namespace Democracy3TextExtractor
                             if (sectionData.Keys.Any(k => ExtractKeyFromString(k.KeyName) == key))
                             {
                                 var keyData = sectionData.Keys.First(k => ExtractKeyFromString(k.KeyName) == key);
-                                ligne[valueIndex] = RemoveSurroundedQuotes(keyData.Value);
+                                ligne[valueIndex] = RemoveSurroundedQuotes(keyData.Value).DeleteAccentAndSpecialsChar();
                             }
                         }
 
