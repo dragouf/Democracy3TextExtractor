@@ -9,6 +9,20 @@ namespace Democracy3TextExtractor
 {
     public static class StringExtensions
     {
+        private readonly static Regex nonSpacingMarkRegex =
+        new Regex(@"\p{Mn}", RegexOptions.Compiled);
+
+        public static string RemoveDiacritics(this string text)
+        {
+            if (text == null)
+                return string.Empty;
+
+            var normalizedText =
+                text.Normalize(NormalizationForm.FormD);
+
+            return nonSpacingMarkRegex.Replace(normalizedText, string.Empty);
+        }
+
         public static string DeleteAccentAndSpecialsChar(this string OriginalText)
         {
             string strTemp = OriginalText;
@@ -17,8 +31,10 @@ namespace Democracy3TextExtractor
             Regex regAA = new Regex("[Ã|À|Â|Ä|Á|Å]");
             Regex regE = new Regex("[é|è|ê|ë]");
             Regex regEE = new Regex("[É|È|Ê|Ë]");
-            Regex regI = new Regex("[í|ì|î|ï]");
+            Regex regI = new Regex("[í|ì|î|ï]");            
             Regex regII = new Regex("[Í|Ì|Î|Ï]");
+            Regex regL = new Regex("[ł]");
+            Regex regLL = new Regex("[Ł]");
             Regex regO = new Regex("[õ|ò|ó|ô|ö]");
             Regex regOO = new Regex("[Õ|Ó|Ò|Ô|Ö]");
             Regex regU = new Regex("[ù|ú|û|ü|µ]");
@@ -43,6 +59,8 @@ namespace Democracy3TextExtractor
             strTemp = regEE.Replace(strTemp, "E");
             strTemp = regI.Replace(strTemp, "i");
             strTemp = regII.Replace(strTemp, "I");
+            strTemp = regL.Replace(strTemp, "l");
+            strTemp = regLL.Replace(strTemp, "l");
             strTemp = regO.Replace(strTemp, "o");
             strTemp = regOO.Replace(strTemp, "O");
             strTemp = regU.Replace(strTemp, "u");

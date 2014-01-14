@@ -40,13 +40,17 @@
             this.openFileDialogTransifex = new System.Windows.Forms.OpenFileDialog();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.buttonExtractMods = new System.Windows.Forms.Button();
+            this.buttonExtractTitles = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.btExtract = new System.Windows.Forms.Button();
+            this.btExtractMain = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxOutputFolder = new System.Windows.Forms.TextBox();
             this.btOutput = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.labelFileType = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -127,27 +131,48 @@
             this.tabControl1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(1, 50);
+            this.tabControl1.Location = new System.Drawing.Point(0, 49);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(812, 100);
+            this.tabControl1.Size = new System.Drawing.Size(814, 147);
             this.tabControl1.TabIndex = 9;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.buttonExtractMods);
+            this.tabPage1.Controls.Add(this.buttonExtractTitles);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.btExtract);
+            this.tabPage1.Controls.Add(this.btExtractMain);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.textBoxOutputFolder);
             this.tabPage1.Controls.Add(this.btOutput);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(804, 74);
+            this.tabPage1.Size = new System.Drawing.Size(806, 121);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Extraction";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // buttonExtractMods
+            // 
+            this.buttonExtractMods.Location = new System.Drawing.Point(649, 76);
+            this.buttonExtractMods.Name = "buttonExtractMods";
+            this.buttonExtractMods.Size = new System.Drawing.Size(149, 23);
+            this.buttonExtractMods.TabIndex = 16;
+            this.buttonExtractMods.Text = "Extract Mods";
+            this.buttonExtractMods.UseVisualStyleBackColor = true;
+            // 
+            // buttonExtractTitles
+            // 
+            this.buttonExtractTitles.Location = new System.Drawing.Point(649, 46);
+            this.buttonExtractTitles.Name = "buttonExtractTitles";
+            this.buttonExtractTitles.Size = new System.Drawing.Size(149, 23);
+            this.buttonExtractTitles.TabIndex = 15;
+            this.buttonExtractTitles.Text = "Extract Titles";
+            this.buttonExtractTitles.UseVisualStyleBackColor = true;
+            this.buttonExtractTitles.Click += new System.EventHandler(this.buttonExtractTitles_Click);
             // 
             // label5
             // 
@@ -169,15 +194,15 @@
             this.label4.TabIndex = 13;
             this.label4.Text = "Filename";
             // 
-            // btExtract
+            // btExtractMain
             // 
-            this.btExtract.Location = new System.Drawing.Point(649, 16);
-            this.btExtract.Name = "btExtract";
-            this.btExtract.Size = new System.Drawing.Size(149, 23);
-            this.btExtract.TabIndex = 1;
-            this.btExtract.Text = "Extract Text";
-            this.btExtract.UseVisualStyleBackColor = true;
-            this.btExtract.Click += new System.EventHandler(this.btExtract_Click);
+            this.btExtractMain.Location = new System.Drawing.Point(649, 16);
+            this.btExtractMain.Name = "btExtractMain";
+            this.btExtractMain.Size = new System.Drawing.Size(149, 23);
+            this.btExtractMain.TabIndex = 1;
+            this.btExtractMain.Text = "Extract Main";
+            this.btExtractMain.UseVisualStyleBackColor = true;
+            this.btExtractMain.Click += new System.EventHandler(this.btExtractMain_Click);
             // 
             // label3
             // 
@@ -209,6 +234,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.labelFileType);
+            this.tabPage2.Controls.Add(this.label6);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.btCompile);
             this.tabPage2.Controls.Add(this.textBoxTransifexFile);
@@ -216,16 +243,36 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(804, 74);
+            this.tabPage2.Size = new System.Drawing.Size(806, 121);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Injection";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // labelFileType
+            // 
+            this.labelFileType.AutoSize = true;
+            this.labelFileType.Font = new System.Drawing.Font("Calibri", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelFileType.Location = new System.Drawing.Point(140, 69);
+            this.labelFileType.Name = "labelFileType";
+            this.labelFileType.Size = new System.Drawing.Size(40, 13);
+            this.labelFileType.TabIndex = 15;
+            this.labelFileType.Text = "<none>";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(10, 68);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(52, 14);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "Detected";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(814, 151);
+            this.ClientSize = new System.Drawing.Size(814, 195);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btBrowseSource);
@@ -257,13 +304,17 @@
         private System.Windows.Forms.OpenFileDialog openFileDialogTransifex;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.Button btExtract;
+        private System.Windows.Forms.Button btExtractMain;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxOutputFolder;
         private System.Windows.Forms.Button btOutput;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button buttonExtractMods;
+        private System.Windows.Forms.Button buttonExtractTitles;
+        private System.Windows.Forms.Label labelFileType;
+        private System.Windows.Forms.Label label6;
     }
 }
 

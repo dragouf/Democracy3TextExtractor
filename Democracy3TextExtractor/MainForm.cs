@@ -12,6 +12,14 @@ using System.Windows.Forms;
 
 namespace Democracy3TextExtractor
 {
+    public enum FileType
+    {
+        MainSentences,
+        Titles,
+        Mods,
+        None
+    }
+
     public partial class MainForm : Form
     {
         public MainForm()
@@ -71,11 +79,18 @@ namespace Democracy3TextExtractor
             {
                 this.textBoxTransifexFile.Text = this.openFileDialogTransifex.FileName;
             }
+
+            // Verifie le format du fichier.
+            var type = this.DetectFileType(this.textBoxTransifexFile.Text);
+            this.labelFileType.Text = type.ToString();
+            if(type == FileType.None)
+                MessageBox.Show("Wrong file format", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
         }
         #endregion
 
         #region Actions buttons
-        private void btExtract_Click(object sender, EventArgs e)
+        private void btExtractMain_Click(object sender, EventArgs e)
         {
             if (!Directory.Exists(this.textBoxOutputFolder.Text))
             {
@@ -83,7 +98,7 @@ namespace Democracy3TextExtractor
                 return;
             }
 
-            string outputFilePath = this.textBoxOutputFolder.Text + "\\democracy3ExtractedText.ini";
+            string outputFilePath = this.textBoxOutputFolder.Text + "\\Democracy3MainExtractedText.ini";
             if (File.Exists(outputFilePath))
                 File.Delete(outputFilePath);
 
@@ -101,7 +116,7 @@ namespace Democracy3TextExtractor
                 }
                 else if (fileName == "tutorial.csv")
                 {
-                    ParseTutorialCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 2, 11);
                 }
             }
 
@@ -113,27 +128,27 @@ namespace Democracy3TextExtractor
                 var fileName = filePath.Replace(path, "");
                 if (fileName == "achievements.csv")
                 {
-                    ParseAchievementsCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 4);
                 }
                 else if (fileName == "policies.csv")
                 {
-                    ParsePoliciesCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 4);
                 }
                 else if (fileName == "pressuregroups.csv")
                 {
-                    ParsePressureGroupsCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 8);
                 }
                 else if (fileName == "simulation.csv")
                 {
-                    ParseSimulationCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 3);
                 }
                 else if (fileName == "situations.csv")
                 {
-                    ParseSituationsCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 3);
                 }
                 else if (fileName == "votertypes.csv")
                 {
-                    ParseVoterTypesCsv(filePath, fileName, iniData);
+                    ParseCsv(filePath, fileName, iniData, 1, 8);
                 }
             }
 
@@ -190,6 +205,70 @@ namespace Democracy3TextExtractor
 
             MessageBox.Show("You can now send the file to transifex website\nFile path : " + outputFilePath, "Extraction finished...", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        private void buttonExtractTitles_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(this.textBoxOutputFolder.Text))
+            {
+                MessageBox.Show("Vous devez choisir un dossier d'extraction", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string outputFilePath = this.textBoxOutputFolder.Text + "\\Democracy3TitlesExtractedText.ini";
+            if (File.Exists(outputFilePath))
+                File.Delete(outputFilePath);
+
+            var iniData = new IniParser.Model.IniData();
+
+            // RACINE
+            string path = this.textBoxSource.Text + "\\";
+            var files = Directory.GetFiles(path);
+            foreach (var filePath in files)
+            {
+                var fileName = filePath.Replace(path, "");
+                if (fileName == "tutorial.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 2, 3);
+                }
+            }
+
+            // SIMULATION
+            path = this.textBoxSource.Text + "\\simulation\\";
+            files = Directory.GetFiles(path);
+            foreach (var filePath in files)
+            {
+                var fileName = filePath.Replace(path, "");
+                if (fileName == "achievements.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 2);
+                }
+                else if (fileName == "policies.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 2);
+                }
+                else if (fileName == "pressuregroups.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 3);
+                }
+                else if (fileName == "simulation.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 2);
+                }
+                else if (fileName == "situations.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 2);
+                }
+                else if (fileName == "votertypes.csv")
+                {
+                    ParseCsv(filePath, fileName, iniData, 1, 2);
+                }
+            }
+
+            var parser = new IniParser.FileIniDataParser();
+            parser.SaveFile(outputFilePath, iniData);
+
+            MessageBox.Show("You can now send the file to transifex website\nFile path : " + outputFilePath, "Extraction finished...", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
         
         private void btCompile_Click(object sender, EventArgs e)
         {
@@ -200,9 +279,24 @@ namespace Democracy3TextExtractor
                 return;
             }
 
+            var type = this.DetectFileType(this.textBoxTransifexFile.Text);
+
+            if(type == FileType.MainSentences)
+                InjectMain();
+            else if(type == FileType.Titles)
+                InjectTitles();
+            else
+                MessageBox.Show("File not currently supported", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            
+        }
+        #endregion
+
+        #region
+        private void InjectMain()
+        {
             var transifexFileParser = new IniParser.FileIniDataParser();
             var transifexInidata = transifexFileParser.LoadFile(this.textBoxTransifexFile.Text, Encoding.UTF8);
-            
+
             // RACINE
             string path = this.textBoxSource.Text + "\\";
             var files = Directory.GetFiles(path);
@@ -215,13 +309,13 @@ namespace Democracy3TextExtractor
                     var fileSection = transifexInidata.Sections.First(s => s.SectionName == fileName);
 
                     if (fileName == "strings.ini")
-                    {                        
+                    {
                         InjectStringIni(filePath, fileName, fileSection);
                     }
                     else if (fileName == "tutorial.csv")
                     {
-                        InjectTutorialCsv(filePath, fileName, fileSection);
-                    }  
+                        InjectCsv(filePath, fileName, fileSection, 2, 11);
+                    }
 
                 }
             }
@@ -239,27 +333,27 @@ namespace Democracy3TextExtractor
 
                     if (fileName == "achievements.csv")
                     {
-                        InjectAchievementsCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 4);
                     }
                     else if (fileName == "policies.csv")
                     {
-                        InjectPoliciesCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 4);
                     }
                     else if (fileName == "pressuregroups.csv")
                     {
-                        InjectPressureGroupsCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 8);
                     }
                     else if (fileName == "simulation.csv")
                     {
-                        InjectSimulationCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 3);
                     }
                     else if (fileName == "situations.csv")
                     {
-                        InjectSituationsCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 3);
                     }
                     else if (fileName == "votertypes.csv")
                     {
-                        InjectVoterTypesCsv(filePath, fileName, fileSection);
+                        InjectCsv(filePath, fileName, fileSection, 1, 8);
                     }
                 }
             }
@@ -315,7 +409,7 @@ namespace Democracy3TextExtractor
                 }
             }
 
-            // Events
+            // Missions
             path = this.textBoxSource.Text + "\\missions\\";
             if (Directory.Exists(path))
             {
@@ -332,48 +426,165 @@ namespace Democracy3TextExtractor
                 }
             }
 
-            MessageBox.Show("Game is now translated.", "Injection finished...", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Main game sentences are now translated.", "Injection finished...", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void InjectTitles()
+        {
+            var transifexFileParser = new IniParser.FileIniDataParser();
+            var transifexInidata = transifexFileParser.LoadFile(this.textBoxTransifexFile.Text, Encoding.UTF8);
+
+            // RACINE
+            string path = this.textBoxSource.Text + "\\";
+            var files = Directory.GetFiles(path);
+            foreach (var filePath in files)
+            {
+                var fileName = filePath.Replace(path, "");
+                // try to find file section in transifex file
+                if (transifexInidata.Sections.Any(s => s.SectionName == fileName))
+                {
+                    var fileSection = transifexInidata.Sections.First(s => s.SectionName == fileName);
+
+                    if (fileName == "tutorial.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 2, 3);
+                    }
+
+                }
+            }
+
+            // SIMULATION
+            path = this.textBoxSource.Text + "\\simulation\\";
+            files = Directory.GetFiles(path);
+            foreach (var filePath in files)
+            {
+                var fileName = filePath.Replace(path, "");
+                // try to find file section in transifex file
+                if (transifexInidata.Sections.Any(s => s.SectionName == fileName))
+                {
+                    var fileSection = transifexInidata.Sections.First(s => s.SectionName == fileName);
+
+                    if (fileName == "achievements.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 2);
+                    }
+                    else if (fileName == "policies.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 2);
+                    }
+                    else if (fileName == "pressuregroups.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 3);
+                    }
+                    else if (fileName == "simulation.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 2);
+                    }
+                    else if (fileName == "situations.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 2);
+                    }
+                    else if (fileName == "votertypes.csv")
+                    {
+                        InjectCsv(filePath, fileName, fileSection, 1, 2);
+                    }
+                }
+            }
+
+            MessageBox.Show("Titles and buttons are now translated.", "Injection finished...", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         #endregion
 
-        #region Ini Root
-        private void InjectStringIni(string filePath, string fileName, IniParser.Model.SectionData sectionData)
+        #region CSV
+        #region Csv Root
+        #endregion
+        #region Csv Simulation
+        #endregion
+        #region Csv Global
+        private void ParseCsv(string filePath, string fileName, IniParser.Model.IniData iniData, int keyIndex, int valueIndex)
         {
-            var stringIniParser = new IniParser.FileIniDataParser();
-            stringIniParser.Parser.Configuration.AllowDuplicateKeys = true;
-            stringIniParser.Parser.Configuration.SkipInvalidLines = true;
-
+            iniData.Sections.AddSection(fileName);
             try
             {
-                var strinInidata = stringIniParser.LoadFile(filePath);
+                var csv = new CsvHelper.CsvReader(File.OpenText(filePath));
 
-                foreach (var sectionKey in sectionData.Keys)
+                while (csv.Read())
                 {
-                    var section = sectionKey.KeyName.Split('@').First();
-                    var key = sectionKey.KeyName.Split('@').Last();
-                    var value = sectionKey.Value.DeleteAccentAndSpecialsChar();
-
-                    if (strinInidata.Sections.Any(s => s.SectionName == section))
-                    {
-                        var iniSectionData = strinInidata.Sections.GetSectionData(section);
-                        if (iniSectionData.Keys.Any(k => k.KeyName == key))
-                        {
-                            iniSectionData.Keys.GetKeyData(key).Value = value;
-                        }
-                    }
+                    var key = csv.GetField(keyIndex);
+                    var value = this.SurroundWithQuotes(csv.GetField(valueIndex));
+                    if (!string.IsNullOrWhiteSpace(key))
+                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(fileName + "@" + key, value);
                 }
-
-                stringIniParser.SaveFile(filePath, strinInidata);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+        private void InjectCsv(string filePath, string fileName, IniParser.Model.SectionData sectionData, int keyIndex, int valueIndex)
+        {
+            try
+            {
+                //var fileWriter = File.OpenWrite(filePath + ".new");
+                var writer = new StreamWriter(filePath + ".new");
+                var csvWriter = new CsvHelper.CsvWriter(writer);
+                var csvReader = new CsvHelper.CsvReader(File.OpenText(filePath));
+
+                while (csvReader.Read())
+                {
+                    if (csvReader.Row == 2)
+                    {
+                        var headers = csvReader.FieldHeaders;
+                        foreach (var item in headers)
+                        {
+                            csvWriter.WriteField(item);
+                        }
+                        csvWriter.NextRecord();
+                    }
+
+                    var ligne = csvReader.CurrentRecord;
+
+                    if (ligne != null)
+                    {
+                        if (ligne.Length > valueIndex)
+                        {
+                            var key = ligne[keyIndex];
+                            if (sectionData.Keys.Any(k => ExtractKeyFromString(k.KeyName) == key))
+                            {
+                                var keyData = sectionData.Keys.First(k => ExtractKeyFromString(k.KeyName) == key);
+                                ligne[valueIndex] = RemoveSurroundedQuotes(keyData.Value).DeleteAccentAndSpecialsChar().RemoveDiacritics();
+                            }
+                        }
+
+                        foreach (var item in ligne)
+                        {
+                            csvWriter.WriteField(item);
+                        }
+                        csvWriter.NextRecord();
+                    }
+                }
+
+                csvReader.Dispose();
+                writer.Close();
+
+                // replace olde file
+                File.Delete(filePath);
+                File.Move(filePath + ".new", filePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        #endregion
+        #endregion
+
+        #region Ini
+        #region Ini Root
         private void ParseStringIni(string filePath, string fileName, IniParser.Model.IniData iniData)
         {
             iniData.Sections.AddSection(fileName);
-           
+
             var stringIniParser = new IniParser.FileIniDataParser();
             stringIniParser.Parser.Configuration.AllowDuplicateKeys = true;
 
@@ -397,16 +608,38 @@ namespace Democracy3TextExtractor
                 MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-        #endregion
+        private void InjectStringIni(string filePath, string fileName, IniParser.Model.SectionData sectionData)
+        {
+            var stringIniParser = new IniParser.FileIniDataParser();
+            stringIniParser.Parser.Configuration.AllowDuplicateKeys = true;
+            stringIniParser.Parser.Configuration.SkipInvalidLines = true;
 
-        #region Csv Root
-        private void ParseTutorialCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 2, 11);
-        }
-        private void InjectTutorialCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 2, 11);
+            try
+            {
+                var strinInidata = stringIniParser.LoadFile(filePath);
+
+                foreach (var sectionKey in sectionData.Keys)
+                {
+                    var section = sectionKey.KeyName.Split('@').First();
+                    var key = sectionKey.KeyName.Split('@').Last();
+                    var value = sectionKey.Value.DeleteAccentAndSpecialsChar().RemoveDiacritics();
+
+                    if (strinInidata.Sections.Any(s => s.SectionName == section))
+                    {
+                        var iniSectionData = strinInidata.Sections.GetSectionData(section);
+                        if (iniSectionData.Keys.Any(k => k.KeyName == key))
+                        {
+                            iniSectionData.Keys.GetKeyData(key).Value = value;
+                        }
+                    }
+                }
+
+                stringIniParser.SaveFile(filePath, strinInidata);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
         #endregion
 
@@ -569,140 +802,35 @@ namespace Democracy3TextExtractor
             InjectStringIni(filePath, fileName, sectionData);
         }
         #endregion
-
-        #region Csv Simulation
-        private void ParseAchievementsCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 4);
-        }
-        private void ParsePoliciesCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 4);
-        }
-        private void ParsePressureGroupsCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 8);
-        }
-        private void ParseSimulationCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 3);
-        }
-        private void ParseSituationsCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 3);
-        }
-        private void ParseVoterTypesCsv(string filePath, string fileName, IniParser.Model.IniData iniData)
-        {
-            ParseCsv(filePath, fileName, iniData, 1, 8);
-        }
-
-        
-        private void InjectAchievementsCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 4);
-        }
-        private void InjectPoliciesCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 4);
-        }
-        private void InjectPressureGroupsCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 8);
-        }
-        private void InjectSimulationCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 3);
-        }
-        private void InjectSituationsCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 3);
-        }
-        private void InjectVoterTypesCsv(string filePath, string fileName, IniParser.Model.SectionData iniData)
-        {
-            InjectCsv(filePath, fileName, iniData, 1, 8);
-        }
         #endregion
 
-        #region Csv Global
-        private void ParseCsv(string filePath, string fileName, IniParser.Model.IniData iniData, int keyIndex, int valueIndex)
-        {
-            iniData.Sections.AddSection(fileName);
-            try
-            {
-                var csv = new CsvHelper.CsvReader(File.OpenText(filePath));
-                
-                while (csv.Read())
-                {
-                    var key = csv.GetField(keyIndex);
-                    var value = this.SurroundWithQuotes(csv.GetField(valueIndex));
-                    if (!string.IsNullOrWhiteSpace(key))
-                        iniData.Sections.GetSectionData(fileName).Keys.AddKey(fileName + "@" + key, value);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        private void InjectCsv(string filePath, string fileName, IniParser.Model.SectionData sectionData, int keyIndex, int valueIndex)
-        {
-            try
-            {
-                //var fileWriter = File.OpenWrite(filePath + ".new");
-                var writer = new StreamWriter(filePath + ".new");
-                var csvWriter = new CsvHelper.CsvWriter(writer);
-                var csvReader = new CsvHelper.CsvReader(File.OpenText(filePath));
-
-                while (csvReader.Read())
-                {
-                    if (csvReader.Row == 2)
-                    {
-                        var headers = csvReader.FieldHeaders;
-                        foreach (var item in headers)
-                        {
-                            csvWriter.WriteField(item);
-                        }
-                        csvWriter.NextRecord();
-                    }
-
-                    var ligne = csvReader.CurrentRecord;
-
-                    if (ligne != null)
-                    {
-                        if (ligne.Length > valueIndex)
-                        {
-                            var key = ligne[keyIndex];
-                            if (sectionData.Keys.Any(k => ExtractKeyFromString(k.KeyName) == key))
-                            {
-                                var keyData = sectionData.Keys.First(k => ExtractKeyFromString(k.KeyName) == key);
-                                ligne[valueIndex] = RemoveSurroundedQuotes(keyData.Value).DeleteAccentAndSpecialsChar();
-                            }
-                        }
-
-                        foreach (var item in ligne)
-                        {
-                            csvWriter.WriteField(item);
-                        }
-                        csvWriter.NextRecord();
-                    }
-                }
-
-                csvReader.Dispose();
-                writer.Close();
-
-                // replace olde file
-                File.Delete(filePath);
-                File.Move(filePath + ".new", filePath);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-        #endregion
 
         #region Tools
+        private FileType DetectFileType(string path)
+        {
+            if (!File.Exists(this.textBoxTransifexFile.Text))              
+                return FileType.None;
+
+            var fileType = FileType.None;
+
+            var transifexFileParser = new IniParser.FileIniDataParser();
+            var transifexInidata = transifexFileParser.LoadFile(this.textBoxTransifexFile.Text, Encoding.UTF8);
+
+            if (transifexInidata.Sections.Select(s => s.SectionName).Contains("strings.ini"))
+            {
+                fileType = FileType.MainSentences;
+            }
+            else if (!transifexInidata.Sections.Select(s => s.SectionName).Contains("strings.ini") && !transifexInidata.Sections.Select(s => s.SectionName).Contains("mods"))
+            {
+                fileType = FileType.Titles;
+            }
+            else if (transifexInidata.Sections.Select(s => s.SectionName).Contains("mods"))
+            {
+                fileType = FileType.Mods;
+            }
+
+            return fileType;
+        }
         private string ExtractKeyFromString(string value)
         {
             var parsed = value.Split('@');
@@ -745,6 +873,6 @@ namespace Democracy3TextExtractor
 
             return value;
         }
-        #endregion
+        #endregion        
     }
 }
