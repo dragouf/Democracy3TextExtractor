@@ -23,6 +23,11 @@ namespace Democracy3TextExtractor
             return nonSpacingMarkRegex.Replace(normalizedText, string.Empty);
         }
 
+        public static string SanitizeQuotes(this string text)
+        {
+            return text.Replace("_QQ_\"", "");
+        }
+
         public static string DeleteAccentAndSpecialsChar(this string OriginalText)
         {
             string strTemp = OriginalText;
@@ -31,7 +36,7 @@ namespace Democracy3TextExtractor
             Regex regAA = new Regex("[Ã|À|Â|Ä|Á|Å]");
             Regex regE = new Regex("[é|è|ê|ë]");
             Regex regEE = new Regex("[É|È|Ê|Ë]");
-            Regex regI = new Regex("[í|ì|î|ï]");            
+            Regex regI = new Regex("[í|ì|î|ï,ı]");
             Regex regII = new Regex("[Í|Ì|Î|Ï]");
             Regex regL = new Regex("[ł]");
             Regex regLL = new Regex("[Ł]");
@@ -83,9 +88,67 @@ namespace Democracy3TextExtractor
             return strTemp;
         }
 
-        //public static string ToUtf8(this string OriginalText)
-        //{
+        public static string SurroundWithQuotes(this string value)
+        {
+            if (!value.StartsWith("\""))
+            {
+                if (value.StartsWith("'"))
+                {
+                    value = value.Substring(1, value.Length - 1);
+                }
+                value = "\"" + value;
+            }
 
-        //}
+            if (!value.EndsWith("\""))
+            {
+                if (value.EndsWith("'"))
+                {
+                    value = value.Substring(0, value.Length - 1);
+                }
+                value = value + "\"";
+            }
+
+            return value;
+        }
+
+        public static string RemoveSurroundedQuotes(this string value)
+        {
+            if (value.StartsWith("\""))
+            {
+                value = value.Substring(1);
+            }
+
+            if (value.EndsWith("\""))
+            {
+                value = value.Substring(0, value.Length - 1);
+            }
+
+            return value;
+        }
+
+        public static string FormatWith(this string source, params object[] parameters)
+        {
+            return string.Format(source, parameters);
+        }
+
+        public static string Utf8ToAnsi(this string chaineUTF8)
+        {
+            var ansi = Encoding.GetEncoding(1252);
+            byte[] utf8Bytes = Encoding.UTF8.GetBytes(chaineUTF8);
+            byte[] ansiBytes = Encoding.Convert(Encoding.UTF8, ansi, utf8Bytes);
+            string chaineANSI = ansi.GetString(ansiBytes)/*.ToString()*/;
+            return chaineANSI;
+        }
+
+        public static string Utf8ToLatin1(this string chaineUTF8)
+        {
+            Encoding iso = Encoding.GetEncoding("ISO-8859-1");
+            Encoding utf8 = Encoding.UTF8;
+            byte[] utfBytes = utf8.GetBytes(chaineUTF8);
+            byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
+            string msg = iso.GetString(isoBytes);
+
+            return msg;
+        }
     }
 }
