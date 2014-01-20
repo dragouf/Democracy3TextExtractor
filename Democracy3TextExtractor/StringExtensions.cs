@@ -36,7 +36,7 @@ namespace Democracy3TextExtractor
             Regex regAA = new Regex("[Ã|À|Â|Ä|Á|Å]");
             Regex regE = new Regex("[é|è|ê|ë]");
             Regex regEE = new Regex("[É|È|Ê|Ë]");
-            Regex regI = new Regex("[í|ì|î|ï,ı]");
+            Regex regI = new Regex("[í|ì|î|ï|ı]");
             Regex regII = new Regex("[Í|Ì|Î|Ï]");
             Regex regL = new Regex("[ł]");
             Regex regLL = new Regex("[Ł]");
