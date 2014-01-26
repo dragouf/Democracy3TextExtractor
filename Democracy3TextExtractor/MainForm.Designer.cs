@@ -41,7 +41,6 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.buttonExtractMods = new System.Windows.Forms.Button();
-            this.buttonExtractTitles = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.btExtractMain = new System.Windows.Forms.Button();
@@ -140,7 +139,6 @@
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.buttonExtractMods);
-            this.tabPage1.Controls.Add(this.buttonExtractTitles);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.btExtractMain);
@@ -157,22 +155,12 @@
             // 
             // buttonExtractMods
             // 
-            this.buttonExtractMods.Location = new System.Drawing.Point(649, 76);
+            this.buttonExtractMods.Location = new System.Drawing.Point(649, 52);
             this.buttonExtractMods.Name = "buttonExtractMods";
             this.buttonExtractMods.Size = new System.Drawing.Size(149, 23);
             this.buttonExtractMods.TabIndex = 16;
             this.buttonExtractMods.Text = "Extract Mods";
             this.buttonExtractMods.UseVisualStyleBackColor = true;
-            // 
-            // buttonExtractTitles
-            // 
-            this.buttonExtractTitles.Location = new System.Drawing.Point(649, 46);
-            this.buttonExtractTitles.Name = "buttonExtractTitles";
-            this.buttonExtractTitles.Size = new System.Drawing.Size(149, 23);
-            this.buttonExtractTitles.TabIndex = 15;
-            this.buttonExtractTitles.Text = "Extract Titles";
-            this.buttonExtractTitles.UseVisualStyleBackColor = true;
-            this.buttonExtractTitles.Click += new System.EventHandler(this.buttonExtractTitles_Click);
             // 
             // label5
             // 
@@ -312,7 +300,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button buttonExtractMods;
-        private System.Windows.Forms.Button buttonExtractTitles;
         private System.Windows.Forms.Label labelFileType;
         private System.Windows.Forms.Label label6;
     }

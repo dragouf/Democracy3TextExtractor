@@ -35,9 +35,7 @@ namespace Democracy3TextExtractor
             InitializeComponent();
             try
             {
-                string InstallPath = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\GOG.com\GOGDEMOCRACY3", "PATH", null);
-                if (!string.IsNullOrEmpty(InstallPath))
-                    this.textBoxSource.Text = InstallPath + "data";
+                LoadGamePath();
 
                 string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 this.textBoxOutputFolder.Text = path;
@@ -46,7 +44,7 @@ namespace Democracy3TextExtractor
                 string pathDownload = Path.Combine(pathUser, "Downloads");
                 this.openFileDialogTransifex.InitialDirectory = pathDownload;
 
-                this.tabControl1.SelectedIndex = 1;
+                //this.tabControl1.SelectedIndex = 1;
             }
             catch 
             {
@@ -102,7 +100,7 @@ namespace Democracy3TextExtractor
         {
             try
             {
-                this.Extractor.ExtractMainSentences();
+                this.Extractor.ExtractAllSentences();
                 MessageBox.Show("Main sentences extracted", "success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -113,15 +111,16 @@ namespace Democracy3TextExtractor
 
         private void buttonExtractTitles_Click(object sender, EventArgs e)
         {
-            try
-            {
-                this.Extractor.ExtractTitlesAndButtonsText();
-                MessageBox.Show("titles and buttons text extracted", "success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            //try
+            //{
+            //    this.Extractor.ExtractTitlesAndButtonsText();
+            //    MessageBox.Show("titles and buttons text extracted", "success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //}
+            MessageBox.Show("Useless now");
         }
         #endregion
 
@@ -131,5 +130,33 @@ namespace Democracy3TextExtractor
             this.Extractor.InjectTransifexFile();   
         }
         #endregion
+
+        private void LoadGamePath()
+        {
+            try
+            {
+                string steamInstallPath = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 245470", "InstallLocation", null);
+                string gogInstallPath = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\GOG.com\GOGDEMOCRACY3", "PATH", null);
+                if (!string.IsNullOrEmpty(steamInstallPath) || !string.IsNullOrEmpty(gogInstallPath))
+                {
+                    if (!string.IsNullOrEmpty(steamInstallPath))
+                    {
+                        this.textBoxSource.Text = steamInstallPath + "\\data";
+                    }
+                    else
+                    {
+                        this.textBoxSource.Text = gogInstallPath + "data";
+                    }
+                }
+                else
+                {
+                    this.textBoxSource.Text = @"C:\Program Files (x86)\Steam\SteamApps\common\Democracy 3\data";
+                }
+            }
+            catch
+            {
+                this.textBoxSource.Text = AppDomain.CurrentDomain.BaseDirectory;
+            }
+        }
     }
 }
