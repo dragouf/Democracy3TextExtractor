@@ -95,7 +95,7 @@ namespace Democracy3TextExtractor
                 }
                 else if (fileName == "votertypes.csv")
                 {
-                    ParseCsv(filePath, fileName, iniData, 1, new List<int> { 8, 2 });
+                    ParseCsv(filePath, fileName, iniData, 1, new List<int> { 8, 2, 3 });
                 }
                 else if (fileName == "sliders.csv")
                 {
