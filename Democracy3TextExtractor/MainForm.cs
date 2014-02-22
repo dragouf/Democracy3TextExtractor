@@ -158,5 +158,27 @@ namespace Democracy3TextExtractor
                 this.textBoxSource.Text = AppDomain.CurrentDomain.BaseDirectory;
             }
         }
+
+        private void buttonExtractMods_Click(object sender, EventArgs e)
+        {
+            var list = this.Extractor.ListMods();
+
+            using (var dialog = new FormModsList(list))
+            {
+                if (dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                {
+                    try
+                    {
+                        var selected = dialog.ModSelected;
+                        this.Extractor.ExtractMod(selected.Path);
+                        MessageBox.Show(@"Mod ""{0}"" extracted".FormatWith(selected.DisplayName), "success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+        }
     }
 }

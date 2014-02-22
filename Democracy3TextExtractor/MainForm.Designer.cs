@@ -161,6 +161,7 @@
             this.buttonExtractMods.TabIndex = 16;
             this.buttonExtractMods.Text = "Extract Mods";
             this.buttonExtractMods.UseVisualStyleBackColor = true;
+            this.buttonExtractMods.Click += new System.EventHandler(this.buttonExtractMods_Click);
             // 
             // label5
             // 
